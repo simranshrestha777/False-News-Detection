@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERITY — Fake News Detector</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #ffffff;
+    color: #1a1a2e;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    display: flex;
+    align-items: center;
+    padding: 18px 40px;
+    border-bottom: 1px solid #e8e8f0;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, #0ab8c8, #0891a0);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-icon svg { width: 20px; height: 20px; fill: white; }
+  .logo-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px; font-weight: 700;
+    color: #0ab8c8; letter-spacing: 1px;
+  }
+  .logo-sub {
+    font-size: 9px; font-weight: 500; letter-spacing: 2px;
+    color: #888; text-transform: uppercase;
+    margin-top: -2px; display: block;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 80px 40px 60px;
+    text-align: center;
+  }
+  .badge {
+    display: inline-block;
+    background: #e8f9fb; color: #0891a0;
+    font-size: 11px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px; border-radius: 20px;
+    border: 1px solid #b2e9ef;
+    margin-bottom: 32px;
+  }
+  h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: clamp(42px, 7vw, 72px);
+    font-weight: 700;
+    line-height: 1.05;
+    color: #1a1a2e;
+    margin-bottom: 24px;
+  }
+  h1 span { color: #0ab8c8; }
+  .hero-desc {
+    font-size: 17px; font-weight: 300; color: #555;
+    line-height: 1.75; max-width: 620px; margin: 0 auto 48px;
+  }
+  .cta-btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, #0ab8c8, #0879a0);
+    color: white; font-size: 15px; font-weight: 600;
+    padding: 16px 36px; border-radius: 8px;
+    text-decoration: none;
+    box-shadow: 0 4px 20px rgba(10,184,200,0.35);
+    transition: transform 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.3px;
+  }
+  .cta-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(10,184,200,0.45);
+  }
+  .cta-btn svg { width: 18px; height: 18px; fill: white; }
+
+  /* ── DIVIDER ── */
+  .divider { height: 1px; background: #f0f0f6; margin: 0 40px; }
+
+  /* ── FEATURES ── */
+  .features {
+    max-width: 900px; margin: 0 auto;
+    padding: 60px 40px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 28px;
+  }
+  .feat-card {
+    background: #f8f9ff;
+    border: 1px solid #e8e8f4;
+    border-radius: 12px;
+    padding: 28px 24px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .feat-card:hover {
+    border-color: #0ab8c8;
+    box-shadow: 0 4px 20px rgba(10,184,200,0.1);
+  }
+  .feat-icon {
+    width: 42px; height: 42px;
+    background: #e8f9fb; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+  }
+  .feat-icon svg { width: 22px; height: 22px; fill: #0891a0; }
+  .feat-title {
+    font-size: 15px; font-weight: 600; color: #1a1a2e;
+    margin-bottom: 8px;
+  }
+  .feat-desc { font-size: 13px; color: #777; line-height: 1.65; }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    background: #f8f9ff;
+    border-top: 1px solid #e8e8f4;
+    border-bottom: 1px solid #e8e8f4;
+    padding: 60px 40px;
+    text-align: center;
+  }
+  .section-label {
+    font-size: 11px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: #0ab8c8;
+    margin-bottom: 12px;
+  }
+  .section-title {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 32px; font-weight: 700; color: #1a1a2e;
+    margin-bottom: 48px;
+  }
+  .steps {
+    display: flex; gap: 0;
+    max-width: 780px; margin: 0 auto;
+    position: relative;
+  }
+  .steps::before {
+    content: '';
+    position: absolute; top: 26px; left: 15%; right: 15%;
+    height: 1px; background: #d8d8ea; z-index: 0;
+  }
+  .step { flex: 1; text-align: center; position: relative; z-index: 1; }
+  .step-num {
+    width: 52px; height: 52px;
+    background: white;
+    border: 2px solid #0ab8c8;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px; font-weight: 700; color: #0ab8c8;
+  }
+  .step h3 { font-size: 14px; font-weight: 600; color: #1a1a2e; margin-bottom: 6px; }
+  .step p { font-size: 12px; color: #888; line-height: 1.5; padding: 0 8px; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 32px 40px;
+    font-size: 12px; color: #bbb;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    </div>
+    <div>
+      <span class="logo-text">VERITY</span>
+      <span class="logo-sub">News Detector</span>
+    </div>
+  </a>
+</nav>
+
+<section class="hero">
+  <div class="badge">AI-Powered Analysis</div>
+  <h1>Detect <span>Fake News</span><br>Instantly</h1>
+  <p class="hero-desc">
+    VERITY uses advanced machine learning to analyze news articles and detect misinformation.
+    Paste any text or enter a URL — get a confidence-scored verdict in seconds.
+  </p>
+  <a href="/detector" class="cta-btn">
+    <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    Start Analyzing
+  </a>
+</section>
+
+<div class="divider"></div>
+
+<div class="features">
+  <div class="feat-card">
+    <div class="feat-icon">
+      <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" stroke="#0891a0" stroke-width="2" fill="none"/></svg>
+    </div>
+    <div class="feat-title">Confidence Score</div>
+    <div class="feat-desc">Every analysis returns a percentage confidence score so you know exactly how certain the model is.</div>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon">
+      <svg viewBox="0 0 24 24" stroke="#0891a0" stroke-width="2" fill="none"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+    </div>
+    <div class="feat-title">URL Analysis</div>
+    <div class="feat-desc">Paste a news article URL and VERITY will fetch and analyze the full article automatically.</div>
+  </div>
+  <div class="feat-card">
+    <div class="feat-icon">
+      <svg viewBox="0 0 24 24" stroke="#0891a0" stroke-width="2" fill="none"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    </div>
+    <div class="feat-title">Instant Results</div>
+    <div class="feat-desc">Powered by a trained ML model running locally — get a REAL or FAKE verdict in under a second.</div>
+  </div>
+</div>
+
+<div class="divider"></div>
+
+<section class="how">
+  <div class="section-label">How it works</div>
+  <div class="section-title">Three steps to the truth</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Input</h3>
+      <p>Paste news text or enter an article URL</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Analyze</h3>
+      <p>ML model processes the content instantly</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Verdict</h3>
+      <p>Get REAL or FAKE with a confidence score</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  &copy; 2026 VERITY — Fake News Detector. Built for truth.
+</footer>
+
+</body>
+</html>

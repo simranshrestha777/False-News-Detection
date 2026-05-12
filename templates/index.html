@@ -1,127 +1,396 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Fake News Detector</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            background-color: #f5f5f5;
-        }
-        .container {
-            margin: 50px auto;
-            padding: 30px;
-            width: 500px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.2);
-        }
-        textarea, input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            font-size: 14px;
-        }
-        button {
-            padding: 10px 25px;
-            margin-top: 15px;
-            cursor: pointer;
-            border: none;
-            border-radius: 5px;
-            font-size: 16px;
-            background-color: #007bff;
-            color: white;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #result {
-            margin-top: 20px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERITY — Fake News Detector</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: #ffffff;
+    color: #1a1a2e;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  nav {
+    display: flex;
+    align-items: center;
+    padding: 18px 40px;
+    border-bottom: 1px solid #e8e8f0;
+    flex-shrink: 0;
+  }
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    text-decoration: none;
+  }
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, #0ab8c8, #0891a0);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .logo-icon svg { width: 20px; height: 20px; stroke: white; fill: none; stroke-width: 2; }
+  .logo-text {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 22px; font-weight: 700;
+    color: #0ab8c8; letter-spacing: 1px;
+  }
+  .logo-sub {
+    font-size: 9px; font-weight: 500; letter-spacing: 2px;
+    color: #888; text-transform: uppercase;
+    margin-top: -2px; display: block;
+  }
+
+  main {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 48px 24px;
+  }
+  .detector-wrapper {
+    width: 100%; max-width: 680px;
+  }
+
+  .tabs {
+    display: flex;
+    background: white;
+    border: 1px solid #e0e0ec;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .tab-btn {
+    flex: 1; padding: 13px 20px;
+    background: transparent;
+    border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px; font-weight: 500; color: #888;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .tab-btn.active { color: #0ab8c8; background: #f0fbfc; }
+  .tab-btn.active::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 2px; background: #0ab8c8;
+  }
+  .tab-btn:not(.active):hover { color: #555; background: #fafafa; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .input-card {
+    background: white;
+    border: 1px solid #e0e0ec;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .input-card textarea,
+  .input-card input[type="text"] {
+    width: 100%; padding: 20px 22px;
+    border: none; outline: none; resize: none;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px; color: #1a1a2e; line-height: 1.65;
+    background: white;
+  }
+  .input-card textarea { min-height: 160px; }
+  .input-card input[type="text"] { border-top: 1px solid #f0f0f8; }
+
+  .card-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px;
+    border-top: 1px solid #f0f0f8;
+    background: #fafafa;
+  }
+  .char-count { font-size: 12px; color: #aaa; }
+
+  .analyze-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #0ab8c8, #0879a0);
+    color: white; font-size: 14px; font-weight: 600;
+    padding: 10px 24px; border-radius: 7px;
+    border: none; cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: 0.2px;
+    box-shadow: 0 3px 12px rgba(10,184,200,0.3);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .analyze-btn:hover { transform: translateY(-1px); box-shadow: 0 5px 18px rgba(10,184,200,0.4); }
+  .analyze-btn:active { transform: translateY(0); }
+  .analyze-btn svg { width: 16px; height: 16px; stroke: white; fill: none; stroke-width: 2.5; }
+
+  .result-card {
+    background: white;
+    border: 1px solid #e0e0ec;
+    border-radius: 12px;
+    padding: 22px 24px;
+    display: none;
+  }
+  .result-card.visible { display: block; }
+
+  .result-header {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .verdict-badge {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px; font-weight: 700; letter-spacing: 1px;
+    padding: 4px 12px; border-radius: 5px;
+    text-transform: uppercase;
+  }
+  .verdict-badge.real { background: #e8f8ee; color: #1a7a3c; border: 1px solid #a8ddb8; }
+  .verdict-badge.fake { background: #fef0f0; color: #b91c1c; border: 1px solid #f5b8b8; }
+  .result-status { font-size: 13px; font-weight: 500; color: #555; }
+
+  .confidence-label {
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 13px; font-weight: 500; color: #555;
+    margin-bottom: 8px;
+  }
+  .confidence-pct { font-weight: 600; color: #1a1a2e; }
+
+  .bar-track {
+    height: 8px; background: #f0f0f8;
+    border-radius: 6px; overflow: hidden;
+    margin-bottom: 14px;
+  }
+  .bar-fill {
+    height: 100%; border-radius: 6px;
+    transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .bar-fill.real { background: linear-gradient(90deg, #22c55e, #16a34a); }
+  .bar-fill.fake { background: linear-gradient(90deg, #f87171, #dc2626); }
+
+  /* method + warning row */
+  .result-meta {
+    font-size: 12px; color: #999;
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  }
+  .meta-pill {
+    background: #f4f4fb; border-radius: 4px;
+    padding: 2px 8px; font-size: 11px; color: #666;
+  }
+  .warning-msg {
+    font-size: 12px; color: #d97706;
+    margin-top: 8px;
+  }
+
+  .loading-row {
+    display: none; align-items: center; gap: 10px;
+    font-size: 13px; color: #888; padding: 8px 0;
+  }
+  .loading-row.visible { display: flex; }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid #e0e0ec;
+    border-top-color: #0ab8c8;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .warning-corner {
+    position: fixed; bottom: 40px; left: 40px;
+    opacity: 0.08; pointer-events: none;
+  }
+  .warning-corner svg { width: 80px; height: 80px; }
+</style>
 </head>
 <body>
-<div class="container">
-    <h2>📰 Fake News Detector</h2>
 
-    <textarea id="news" rows="8" placeholder="Enter news text here..."></textarea>
-    <br>
-    <button onclick="predict()">Check News</button>
+<nav>
+  <a href="/" class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h7"/></svg>
+    </div>
+    <div>
+      <span class="logo-text">VERITY</span>
+      <span class="logo-sub">News Detector</span>
+    </div>
+  </a>
+</nav>
 
-    <h3>OR Check via URL</h3>
-    <input type="text" id="url" placeholder="Enter news URL">
-    <br>
-    <button onclick="predictURL()">Check URL</button>
+<main>
+  <div class="detector-wrapper">
 
-    <h3 id="result"></h3>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('text', this)">Paste text</button>
+      <button class="tab-btn" onclick="switchTab('url', this)">Check URL</button>
+    </div>
+
+    <div class="panel active" id="panel-text">
+      <div class="input-card">
+        <textarea id="news" placeholder="Paste or type your news article text here..." oninput="updateCount('news','count-text')"></textarea>
+        <div class="card-footer">
+          <span class="char-count"><span id="count-text">0</span> characters</span>
+          <button class="analyze-btn" onclick="predict()">
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Analyze
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-url">
+      <div class="input-card">
+        <input type="text" id="url" placeholder="https://example.com/news-article">
+        <div class="card-footer">
+          <span class="char-count">Enter a valid news article URL</span>
+          <button class="analyze-btn" onclick="predictURL()">
+            <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            Analyze
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading-row" id="loading-row">
+      <div class="spinner"></div>
+      <span id="loading-msg">Analyzing…</span>
+    </div>
+
+    <div class="result-card" id="result-card">
+      <div class="result-header">
+        <span class="verdict-badge" id="verdict-badge">REAL</span>
+        <span class="result-status" id="result-status">Analysis complete</span>
+      </div>
+      <div class="confidence-label">
+        <span>Confidence</span>
+        <span class="confidence-pct" id="conf-pct">0%</span>
+      </div>
+      <div class="bar-track">
+        <div class="bar-fill" id="bar-fill" style="width:0%"></div>
+      </div>
+      <div class="result-meta" id="result-meta"></div>
+      <div class="warning-msg" id="warning-msg" style="display:none"></div>
+    </div>
+
+  </div>
+</main>
+
+<div class="warning-corner">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="1.5">
+    <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+    <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+  </svg>
 </div>
 
 <script>
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+  hideResult();
+}
+
+function updateCount(inputId, countId) {
+  document.getElementById(countId).textContent = document.getElementById(inputId).value.length;
+}
+
+function showLoading(msg) {
+  document.getElementById('loading-msg').textContent = msg;
+  document.getElementById('loading-row').classList.add('visible');
+  hideResult();
+}
+function hideLoading() {
+  document.getElementById('loading-row').classList.remove('visible');
+}
+function hideResult() {
+  document.getElementById('result-card').classList.remove('visible');
+}
+
+function showResult(data) {
+  hideLoading();
+
+  // ── debug: always log what backend returned ──
+  console.log('Backend response:', data);
+
+  if (data.error) {
+    alert('⚠️ ' + data.error);
+    return;
+  }
+
+  if (!data.prediction) {
+    console.error('Unexpected response shape:', data);
+    alert('Unexpected response from server. Check console (F12) for details.');
+    return;
+  }
+
+  const isReal = data.prediction === 'REAL';
+
+  // badge
+  const badge = document.getElementById('verdict-badge');
+  badge.textContent = data.prediction;
+  badge.className   = 'verdict-badge ' + (isReal ? 'real' : 'fake');
+
+  // confidence bar
+  const bar = document.getElementById('bar-fill');
+  bar.className   = 'bar-fill ' + (isReal ? 'real' : 'fake');
+  bar.style.width = (data.confidence || 0) + '%';
+  document.getElementById('conf-pct').textContent = (data.confidence || 0) + '%';
+
+  // method / rating / publisher pills
+  const meta = document.getElementById('result-meta');
+  meta.innerHTML = '';
+  if (data.method)     meta.innerHTML += `<span class="meta-pill">${data.method}</span>`;
+  if (data.rating)     meta.innerHTML += `<span class="meta-pill">Rating: ${data.rating}</span>`;
+  if (data.publisher)  meta.innerHTML += `<span class="meta-pill">Source: ${data.publisher}</span>`;
+
+  // warning
+  const warn = document.getElementById('warning-msg');
+  if (data.warning) {
+    warn.textContent = '⚠️ ' + data.warning;
+    warn.style.display = 'block';
+  } else {
+    warn.style.display = 'none';
+  }
+
+  document.getElementById('result-card').classList.add('visible');
+}
+
 function predict() {
-    let text = document.getElementById("news").value.trim();
-
-    if(text === "") {
-        alert("Please enter some news text.");
-        return;
-    }
-
-    document.getElementById("result").innerText = "Analyzing text...";
-
-    fetch("/predict", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ text: text })
-    })
-    .then(res => res.json())
-    .then(data => {
-        let color = data.prediction === "REAL" ? "green" : "red";
-        let message = data.prediction === "REAL" ? "This news appears trustworthy ✅" : "This news may be fake ⚠️";
-
-        document.getElementById("result").innerHTML =
-            `<span style="color:${color}">${message}<br>${data.prediction} (${data.confidence}% confidence)</span>`;
-    })
-    .catch(err => {
-        document.getElementById("result").innerText = "Error processing text.";
-        console.error(err);
-    });
+  const text = document.getElementById('news').value.trim();
+  if (!text) { alert('Please enter some news text.'); return; }
+  showLoading('Analyzing text…');
+  fetch('/predict', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ text })
+  })
+  .then(r => r.json())
+  .then(data => showResult(data))
+  .catch(err => {
+    hideLoading();
+    console.error('Fetch error:', err);
+    alert('Network error — make sure Flask is running. Check console (F12).');
+  });
 }
 
 function predictURL() {
-    let url = document.getElementById("url").value.trim();
-
-    if(url === "") {
-        alert("Please enter a URL");
-        return;
-    }
-
-    document.getElementById("result").innerText = "Fetching and analyzing article...";
-
-    fetch("/predict_url", {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ url: url })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.error) {
-            document.getElementById("result").innerText = data.error;
-            return;
-        }
-
-        let color = data.prediction === "REAL" ? "green" : "red";
-        let message = data.prediction === "REAL" ? "This news appears trustworthy ✅" : "This news may be fake ⚠️";
-
-        document.getElementById("result").innerHTML =
-            `<span style="color:${color}">${message}<br>${data.prediction} (${data.confidence}% confidence)</span>`;
-    })
-    .catch(err => {
-        document.getElementById("result").innerText = "Error fetching URL.";
-        console.error(err);
-    });
+  const url = document.getElementById('url').value.trim();
+  if (!url) { alert('Please enter a URL.'); return; }
+  showLoading('Fetching and analyzing article…');
+  fetch('/predict_url', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ url })
+  })
+  .then(r => r.json())
+  .then(data => showResult(data))
+  .catch(err => {
+    hideLoading();
+    console.error('Fetch error:', err);
+    alert('Network error — make sure Flask is running. Check console (F12).');
+  });
 }
 </script>
 </body>
